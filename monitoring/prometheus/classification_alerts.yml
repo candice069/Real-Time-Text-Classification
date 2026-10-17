@@ -1,0 +1,73 @@
+groups:
+  - name: classification_alerts
+    interval: 30s
+    rules:
+      # High latency alert
+      - alert: ClassificationHighLatency
+        expr: classification_prediction_duration_seconds > 1.0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Classification API high latency"
+          description: "Average prediction latency is {{ $value }}s for the last 2 minutes"
+
+      # High error rate
+      - alert: ClassificationHighErrorRate
+        expr: rate(classification_predictions_total{status="error"}[5m]) / rate(classification_predictions_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Classification API high error rate"
+          description: "Error rate is {{ $value | humanizePercentage }} for the last 5 minutes"
+
+      # Low cache hit rate
+      - alert: ClassificationLowCacheHitRate
+        expr: rate(classification_cache_hits_total[5m]) / (rate(classification_cache_hits_total[5m]) + rate(classification_cache_misses_total[5m])) < 0.3
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low cache hit rate"
+          description: "Cache hit rate is {{ $value | humanizePercentage }} for the last 10 minutes"
+
+      # API down
+      - alert: ClassificationAPIDown
+        expr: up{job="classification-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Classification API is down"
+          description: "Classification API has been down for more than 1 minute"
+
+      # High throughput - potential scaling needed
+      - alert: ClassificationHighThroughput
+        expr: rate(classification_predictions_total[1m]) > 1000
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: "High classification throughput"
+          description: "Processing {{ $value }} predictions per second"
+
+      # Kafka consumer lag
+      - alert: KafkaConsumerLag
+        expr: kafka_consumer_lag > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High Kafka consumer lag"
+          description: "Consumer lag is {{ $value }} messages"
+
+      # Redis connection issues
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis is down"
+          description: "Redis cache is not responding"

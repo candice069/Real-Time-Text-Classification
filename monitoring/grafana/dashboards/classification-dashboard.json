@@ -1,0 +1,170 @@
+{
+  "dashboard": {
+    "title": "Text Classification System Overview",
+    "tags": ["classification", "ml", "monitoring"],
+    "timezone": "browser",
+    "schemaVersion": 36,
+    "refresh": "5s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Prediction Throughput",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(classification_predictions_total[1m])",
+            "legendFormat": "Predictions/sec"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Average Latency",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(classification_prediction_duration_seconds_bucket[5m])) * 1000",
+            "legendFormat": "P95 Latency (ms)"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(classification_prediction_duration_seconds_bucket[5m])) * 1000",
+            "legendFormat": "P99 Latency (ms)"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Cache Hit Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(classification_cache_hits_total[5m]) / (rate(classification_cache_hits_total[5m]) + rate(classification_cache_misses_total[5m])) * 100",
+            "legendFormat": "Hit Rate %"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0}
+      },
+      {
+        "id": 4,
+        "title": "Active Requests",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "classification_active_requests",
+            "legendFormat": "Active"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0}
+      },
+      {
+        "id": 5,
+        "title": "Prediction Latency Distribution",
+        "type": "heatmap",
+        "targets": [
+          {
+            "expr": "sum(rate(classification_prediction_duration_seconds_bucket[5m])) by (le)",
+            "format": "heatmap"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+        "heatmap": {
+          "yAxis": {
+            "format": "s",
+            "decimals": 3
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Request Rate by Status",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(classification_predictions_total[5m])",
+            "legendFormat": "{{ status }} - {{ cached }}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4}
+      },
+      {
+        "id": 7,
+        "title": "Cache Performance",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(classification_cache_hits_total[5m])",
+            "legendFormat": "Cache Hits"
+          },
+          {
+            "expr": "rate(classification_cache_misses_total[5m])",
+            "legendFormat": "Cache Misses"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 12}
+      },
+      {
+        "id": 8,
+        "title": "API Resource Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "container_cpu_usage_seconds_total{container=\"api\"}",
+            "legendFormat": "CPU Usage"
+          },
+          {
+            "expr": "container_memory_working_set_bytes{container=\"api\"} / 1024 / 1024",
+            "legendFormat": "Memory (MB)"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 12, "y": 12}
+      },
+      {
+        "id": 9,
+        "title": "Kafka Consumer Lag",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "kafka_consumer_lag",
+            "legendFormat": "Lag"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 18}
+      },
+      {
+        "id": 10,
+        "title": "Redis Performance",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "redis_commands_processed_total",
+            "legendFormat": "Commands/sec"
+          },
+          {
+            "expr": "redis_memory_used_bytes / 1024 / 1024",
+            "legendFormat": "Memory (MB)"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 12, "y": 18}
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "templating": {
+      "list": [
+        {
+          "name": "namespace",
+          "type": "query",
+          "query": "label_values(kubernetes_namespace)",
+          "current": {
+            "text": "text-classification",
+            "value": "text-classification"
+          }
+        }
+      ]
+    }
+  }
+}

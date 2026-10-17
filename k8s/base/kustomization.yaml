@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: text-classification
+
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - redis.yaml
+  - kafka.yaml
+  - api-deployment.yaml
+  - consumer-deployment.yaml
+  - hpa.yaml
+
+commonLabels:
+  app.kubernetes.io/name: text-classification
+  app.kubernetes.io/version: "1.0.0"
+  app.kubernetes.io/managed-by: kustomize
+
+images:
+  - name: text-classification-api
+    newTag: latest
+  - name: text-classification-consumer
+    newTag: latest
+  - name: text-classification-producer
+    newTag: latest

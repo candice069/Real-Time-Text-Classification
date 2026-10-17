@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: text-classification
+  labels:
+    name: text-classification
+    app.kubernetes.io/name: text-classification
+    app.kubernetes.io/managed-by: kubectl

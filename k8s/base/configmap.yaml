@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: classification-config
+  namespace: text-classification
+data:
+  API_HOST: "0.0.0.0"
+  API_PORT: "8000"
+  API_WORKERS: "4"
+  REDIS_HOST: "redis-service"
+  REDIS_PORT: "6379"
+  REDIS_CACHE_TTL: "3600"
+  MODEL_PATH: "/app/models/bert-classifier"
+  KAFKA_BOOTSTRAP_SERVERS: "kafka-service:9092"
+  KAFKA_TOPIC: "text-classification-requests"
+  KAFKA_CONSUMER_GROUP: "classifier-group"
+  LOG_LEVEL: "INFO"
+  PROMETHEUS_PORT: "9090"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-config
+  namespace: text-classification
+data:
+  KAFKA_NUM_PARTITIONS: "6"
+  KAFKA_DEFAULT_REPLICATION_FACTOR: "1"
+  KAFKA_RETENTION_MS: "604800000"
